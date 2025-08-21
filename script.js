@@ -1,47 +1,56 @@
-/* Sentimental Weather Extension - script.js (v4.0.0 - AI-Powered) */
+/* Text Weather Extension - script.js (v3.0.0 - Final DOM Creation Method) */
 (function() {
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
-        initSentimentalWeather();
+        initWeatherEffect();
     } else {
-        document.addEventListener('DOMContentLoaded', initSentimentalWeather);
+        document.addEventListener('DOMContentLoaded', initWeatherEffect);
     }
 
-    function initSentimentalWeather() {
-        // 创建一个 Sentiment 分析器实例
-        const sentiment = new Sentiment();
+    function initWeatherEffect() {
+        const weatherTypes = [{ name: 'rain' }, { name: 'snow' }, { name: 'sun' }];
+        const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
         const chatElement = document.getElementById('chat');
         if (!chatElement) return;
 
-        function createWeather(container, weatherName) {
+        function createWeather(container) {
             container.innerHTML = ''; // 清空旧内容
+            const weather = getRandomItem(weatherTypes);
 
-            if (weatherName === 'sun') {
+            if (weather.name === 'sun') {
                 const sun = document.createElement('div');
                 sun.className = 'weather-sun';
                 sun.textContent = '☀️';
                 container.appendChild(sun);
             } else {
-                const cloudContainer = document.createElement('div');
-                cloudContainer.className = 'weather-cloud-container';
+                // ★ 创建云朵元素
                 const cloud = document.createElement('div');
                 cloud.className = 'weather-cloud';
-                cloudContainer.appendChild(cloud);
+                container.appendChild(cloud);
 
-                const particles = document.createElement('div');
-                particles.className = 'weather-particles ' + (weatherName === 'rain' ? 'weather-rain' : 'weather-snow');
-                
-                const particleCount = 5;
+                // ★ 创建独立的粒子元素
+                const particleCount = 5; // 你可以增加这个数量来让雨/雪更密集
                 for (let i = 0; i < particleCount; i++) {
-                    const p = document.createElement('span');
-                    p.textContent = weatherName === 'rain' ? '|' : '❄️';
-                    p.style.left = `${10 + Math.random() * 80}%`;
-                    p.style.animationDelay = `${Math.random() * 2}s`;
-                    p.style.animationDuration = `${(weatherName === 'rain' ? 1.5 : 4) + Math.random()}s`;
-                    particles.appendChild(p);
+                    const particle = document.createElement('span');
+                    particle.className = 'weather-particle';
+                    
+                    if (weather.name === 'rain') {
+                        particle.classList.add('particle-rain');
+                        particle.textContent = '|';
+                        particle.style.animationDuration = `${1.5 + Math.random()}s`;
+                    } else { // snow
+                        particle.classList.add('particle-snow');
+                        particle.textContent = '❄️';
+                        particle.style.animationDuration = `${4 + Math.random() * 2}s`;
+                    }
+                    
+                    // 为每个粒子设置随机的水平位置和动画延迟
+                    particle.style.left = `${15 + Math.random() * 70}%`; // 在容器内随机分布
+                    particle.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    container.appendChild(particle);
                 }
-                cloudContainer.appendChild(particles);
-                container.appendChild(cloudContainer);
             }
+            // 渐显效果
             setTimeout(() => { container.style.opacity = 1; }, 50);
         }
 
@@ -52,30 +61,10 @@
                         if (node.nodeType === 1 && node.classList.contains('mes')) {
                             const prevMessage = node.previousElementSibling;
                             if (prevMessage && prevMessage.classList.contains('mes') && !prevMessage.querySelector('.weather-container')) {
-                                
-                                // ★★★ 智能逻辑核心 ★★★
-                                const messageTextElement = prevMessage.querySelector('.mes_text');
-                                const messageText = messageTextElement ? messageTextElement.innerText : '';
-                                
-                                // 1. 分析文本情感
-                                const result = sentiment.analyze(messageText);
-                                const score = result.score; // score > 0 是积极, < 0 是消极, == 0 是中性
-                                
-                                // 2. 根据情感分数决定天气
-                                let weatherName;
-                                if (score > 0) {
-                                    weatherName = 'sun'; // 积极情绪 -> 晴天
-                                } else if (score < 0) {
-                                    weatherName = 'rain'; // 消极情绪 -> 雨天
-                                } else {
-                                    weatherName = 'snow'; // 中性情绪 -> 雪天 (一种宁静的感觉)
-                                }
-                                // ★★★★★★★★★★★★★★★★★
-                                
                                 const weatherContainer = document.createElement('div');
                                 weatherContainer.className = 'weather-container';
                                 prevMessage.appendChild(weatherContainer);
-                                createWeather(weatherContainer, weatherName);
+                                createWeather(weatherContainer);
                             }
                         }
                     });
@@ -84,6 +73,6 @@
         });
 
         observer.observe(chatElement, { childList: true });
-        console.log("🌦️ Sentimental Weather extension (v4.0.0) loaded successfully!");
+        console.log("🌦️ Text Weather extension (v3.0.0) loaded successfully!");
     }
 })();
