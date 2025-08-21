@@ -1,9 +1,10 @@
 {
     "name": "Text Weather",
-    "author": "YourName",
+    "author": "玉元一",
     "description": "Adds beautiful, random text-based weather effects between chat messages.",
     "version": "1.0.1",
     "tags": ["Themes", "Animation", "UI"],
     "css": ["style.css"],
     "js": ["script.js"]
 }
+
