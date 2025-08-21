@@ -1,4 +1,4 @@
-/* Text Weather Extension - script.js (v2.0.0 - Smart Position) */
+/* Text Weather Extension - script.js (v2.1.0 - Clipping Fix & Centered Position) */
 (function() {
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         initWeatherEffect();
@@ -7,66 +7,50 @@
     }
 
     function initWeatherEffect() {
-        const weatherTypes = [
-            { name: 'rain' },
-            { name: 'snow' },
-            { name: 'sun' }
-        ];
+        const weatherTypes = [{ name: 'rain' }, { name: 'snow' }, { name: 'sun' }];
         const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
         const chatElement = document.getElementById('chat');
         if (!chatElement) return;
 
-        function createWeather(container, weather) {
+        function createWeather(container) {
             container.innerHTML = ''; // 清空旧内容
+            const weather = getRandomItem(weatherTypes);
 
-            // ★ 智能定位逻辑 ★
             if (weather.name === 'sun') {
-                // 太阳：保持居中
-                container.style.left = '50%';
-                container.style.transform = 'translateX(-50%)';
                 const sun = document.createElement('div');
                 sun.className = 'weather-sun';
                 sun.textContent = '☀️';
                 container.appendChild(sun);
             } else {
-                // 雨/雪：定位到头像上方
-                const prevMessage = container.parentElement;
-                const avatarWrapper = prevMessage.querySelector('.mesAvatarWrapper');
-                if (avatarWrapper) {
-                    const avatarRect = avatarWrapper.getBoundingClientRect();
-                    const chatRect = chatElement.getBoundingClientRect();
-                    // 计算头像中心点相对于聊天框的横坐标
-                    const leftPosition = avatarRect.left - chatRect.left + (avatarRect.width / 2);
-                    container.style.left = `${leftPosition}px`;
-                    container.style.transform = 'translateX(-50%)';
-                } else {
-                    // 如果找不到头像，就默认居中
-                    container.style.left = '50%';
-                    container.style.transform = 'translateX(-50%)';
-                }
-
-                // 创建云朵
+                // ★ 创建新的HTML结构来解决遮罩问题 ★
+                // 1. 云朵容器 (负责遮罩)
+                const cloudContainer = document.createElement('div');
+                cloudContainer.className = 'weather-cloud-container';
+                
+                // 2. 云朵本身
                 const cloud = document.createElement('div');
                 cloud.className = 'weather-cloud';
-                container.appendChild(cloud);
+                cloudContainer.appendChild(cloud);
 
-                // 创建粒子效果容器
+                // 3. 粒子容器 (会被云朵容器遮罩)
                 const particles = document.createElement('div');
                 particles.className = 'weather-particles ' + (weather.name === 'rain' ? 'weather-rain' : 'weather-snow');
                 
-                // 创建多个粒子
-                const particleCount = 5; // 雨丝/雪花数量
+                const particleCount = 5;
                 for (let i = 0; i < particleCount; i++) {
                     const p = document.createElement('span');
                     p.textContent = weather.name === 'rain' ? '|' : '❄️';
-                    p.style.left = `${Math.random() * 100}%`;
+                    p.style.left = `${10 + Math.random() * 80}%`; // 粒子在容器内随机分布
                     p.style.animationDelay = `${Math.random() * 2}s`;
-                    p.style.animationDuration = `${1.5 + Math.random()}s`;
+                    p.style.animationDuration = `${(weather.name === 'rain' ? 1.5 : 4) + Math.random()}s`;
                     particles.appendChild(p);
                 }
-                container.appendChild(particles);
+                cloudContainer.appendChild(particles);
+                
+                // 将完整的云朵+粒子结构添加到主容器
+                container.appendChild(cloudContainer);
             }
-            // 渐显效果
+
             setTimeout(() => { container.style.opacity = 1; }, 50);
         }
 
@@ -76,13 +60,11 @@
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType === 1 && node.classList.contains('mes')) {
                             const prevMessage = node.previousElementSibling;
-                            if (prevMessage && prevMessage.classList.contains('mes')) {
-                                if (prevMessage.querySelector('.weather-container')) return; // 防止重复添加
+                            if (prevMessage && prevMessage.classList.contains('mes') && !prevMessage.querySelector('.weather-container')) {
                                 const weatherContainer = document.createElement('div');
                                 weatherContainer.className = 'weather-container';
                                 prevMessage.appendChild(weatherContainer);
-                                const randomWeather = getRandomItem(weatherTypes);
-                                createWeather(weatherContainer, randomWeather);
+                                createWeather(weatherContainer);
                             }
                         }
                     });
@@ -91,6 +73,6 @@
         });
 
         observer.observe(chatElement, { childList: true });
-        console.log("🌦️ Text Weather extension (v2.0.0) loaded successfully!");
+        console.log("🌦️ Text Weather extension (v2.1.0) loaded successfully!");
     }
 })();
