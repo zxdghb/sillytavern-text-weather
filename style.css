@@ -1,77 +1,86 @@
-/* Sentimental Weather Extension - style.css (v4.0.0) */
+/* Text Weather Extension - style.css (v3.0.0 - Final Architecture) */
 
+/* 基础布局 */
 div.mes {
     position: relative;
-    margin-bottom: 110px !important;
+    margin-bottom: 120px !important;
 }
+
 .weather-container {
     position: absolute;
-    bottom: -80px;
+    bottom: -110px;
     left: 50%;
     transform: translateX(-50%);
-    width: 80px;
-    height: 70px;
+    width: 100px;
+    height: 100px;
     pointer-events: none;
     opacity: 0;
     transition: opacity 0.5s ease-in;
 }
 
-/* 云朵容器 */
-.weather-cloud-container {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 45px;
-    overflow: hidden;
-    z-index: 1;
-}
+/* ★ 云朵的样式 */
 .weather-cloud {
-    width: 70px; height: 100%;
-    margin: 0 auto;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 45px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 45'%3E%3Cpath d='M55.5,45h-41C6.5,45,0,38.5,0,30.5S6.5,16,14.5,16c1.5,0,3,0.2,4.4,0.7C22.3,7.9,31.2,2,41.5,2C52.8,2,62,11.2,62,22.5c0,1.8-0.2,3.6-0.7,5.3c4.6,0.8,8.2,4.8,8.2,9.7C69.5,43.2,63.2,45,55.5,45z' fill='%23a0c4ff'/%3E%3C/svg%3E");
     background-size: contain;
     background-repeat: no-repeat;
-    background-position: center;
     animation: cloud-float 8s ease-in-out infinite;
+    z-index: 2; /* 云朵在粒子之上 */
+}
+@keyframes cloud-float {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-48%, -2px); }
 }
 
-/* ★ 为不同情绪的云朵上色 ★ */
-.weather-rain .weather-cloud {
-    /* 消极情绪的云朵 - 深蓝色 */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 45'%3E%3Cpath d='M55.5,45h-41C6.5,45,0,38.5,0,30.5S6.5,16,14.5,16c1.5,0,3,0.2,4.4,0.7C22.3,7.9,31.2,2,41.5,2C52.8,2,62,11.2,62,22.5c0,1.8-0.2,3.6-0.7,5.3c4.6,0.8,8.2,4.8,8.2,9.7C69.5,43.2,63.2,45,55.5,45z' fill='%236b7b9e'/%3E%3C/svg%3E");
-}
-.weather-snow .weather-cloud {
-    /* 中性情绪的云朵 - 浅灰色 */
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 70 45'%3E%3Cpath d='M55.5,45h-41C6.5,45,0,38.5,0,30.5S6.5,16,14.5,16c1.5,0,3,0.2,4.4,0.7C22.3,7.9,31.2,2,41.5,2C52.8,2,62,11.2,62,22.5c0,1.8-0.2,3.6-0.7,5.3c4.6,0.8,8.2,4.8,8.2,9.7C69.5,43.2,63.2,45,55.5,45z' fill='%23d1d5db'/%3E%3C/svg%3E");
-}
-
-/* 太阳 */
+/* ★ 太阳的样式 */
 .weather-sun {
     font-size: 50px;
-    position: absolute; top: 10px; left: 50%;
+    position: absolute;
+    top: 10px;
+    left: 50%;
     transform: translateX(-50%);
     animation: spin-sun 15s linear infinite;
 }
+@keyframes spin-sun {
+    to { transform: translateX(-50%) rotate(360deg); }
+}
 
-/* 粒子 */
-.weather-particles {
-    position: absolute; top: 0; left: 0;
-    width: 100%; height: 100%;
-}
-.weather-particles span {
+/* ★ 雨丝/雪花粒子的样式 */
+.weather-particle {
     position: absolute;
-    animation-iteration-count: infinite;
+    top: 30px; /* 从云朵下方开始 */
+    z-index: 1; /* 确保粒子在云朵之下 */
+}
+
+.particle-rain {
+    font-family: monospace;
+    font-size: 20px;
+    font-weight: 100;
+    color: #8cb7ff;
+    animation-name: fall-down;
     animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
-.weather-rain span {
-    font-family: monospace; font-size: 20px; font-weight: 100;
-    color: #8cb7ff; animation-name: fall-down;
-}
-.weather-snow span {
+
+.particle-snow {
     font-size: 18px;
-    color: #e0f2fe; animation-name: fall-sway;
+    color: #e0f2fe;
+    animation-name: fall-sway;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
 }
 
 /* 动画 */
-@keyframes cloud-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-@keyframes spin-sun { to { transform: translateX(-50%) rotate(360deg); } }
-@keyframes fall-down { from { transform: translateY(0); opacity: 1; } to { transform: translateY(80px); opacity: 0; } }
-@keyframes fall-sway { from { transform: translateY(0) translateX(0); opacity: 1; } to { transform: translateY(80px) translateX(15px); opacity: 0; } }
+@keyframes fall-down {
+    from { transform: translateY(0); opacity: 1; }
+    to { transform: translateY(80px); opacity: 0; }
+}
+@keyframes fall-sway {
+    from { transform: translateY(0) translateX(0); opacity: 1; }
+    to { transform: translateY(80px) translateX(15px); opacity: 0; }
+}
