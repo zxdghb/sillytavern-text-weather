@@ -1,4 +1,4 @@
-/* Text Weather Extension - script.js (v2.1.0 - Clipping Fix & Centered Position) */
+/* Text Weather Extension - script.js (v3.0.0 - Final DOM Creation Method) */
 (function() {
     if (document.readyState === 'complete' || document.readyState === 'interactive') {
         initWeatherEffect();
@@ -22,41 +22,41 @@
                 sun.textContent = '☀️';
                 container.appendChild(sun);
             } else {
-                // ★ 创建新的HTML结构来解决遮罩问题 ★
-                // 1. 云朵容器 (负责遮罩)
-                const cloudContainer = document.createElement('div');
-                cloudContainer.className = 'weather-cloud-container';
-                
-                // 2. 云朵本身
+                // ★ 创建云朵元素
                 const cloud = document.createElement('div');
                 cloud.className = 'weather-cloud';
-                cloudContainer.appendChild(cloud);
+                container.appendChild(cloud);
 
-                // 3. 粒子容器 (会被云朵容器遮罩)
-                const particles = document.createElement('div');
-                particles.className = 'weather-particles ' + (weather.name === 'rain' ? 'weather-rain' : 'weather-snow');
-                
-                const particleCount = 5;
+                // ★ 创建独立的粒子元素
+                const particleCount = 5; // 你可以增加这个数量来让雨/雪更密集
                 for (let i = 0; i < particleCount; i++) {
-                    const p = document.createElement('span');
-                    p.textContent = weather.name === 'rain' ? '|' : '❄️';
-                    p.style.left = `${10 + Math.random() * 80}%`; // 粒子在容器内随机分布
-                    p.style.animationDelay = `${Math.random() * 2}s`;
-                    p.style.animationDuration = `${(weather.name === 'rain' ? 1.5 : 4) + Math.random()}s`;
-                    particles.appendChild(p);
+                    const particle = document.createElement('span');
+                    particle.className = 'weather-particle';
+                    
+                    if (weather.name === 'rain') {
+                        particle.classList.add('particle-rain');
+                        particle.textContent = '|';
+                        particle.style.animationDuration = `${1.5 + Math.random()}s`;
+                    } else { // snow
+                        particle.classList.add('particle-snow');
+                        particle.textContent = '❄️';
+                        particle.style.animationDuration = `${4 + Math.random() * 2}s`;
+                    }
+                    
+                    // 为每个粒子设置随机的水平位置和动画延迟
+                    particle.style.left = `${15 + Math.random() * 70}%`; // 在容器内随机分布
+                    particle.style.animationDelay = `${Math.random() * 2}s`;
+                    
+                    container.appendChild(particle);
                 }
-                cloudContainer.appendChild(particles);
-                
-                // 将完整的云朵+粒子结构添加到主容器
-                container.appendChild(cloudContainer);
             }
-
+            // 渐显效果
             setTimeout(() => { container.style.opacity = 1; }, 50);
         }
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
-                if (mutation.addedNodes.length) {
+                if (mutation.addedNodes.length > 0) {
                     mutation.addedNodes.forEach(node => {
                         if (node.nodeType === 1 && node.classList.contains('mes')) {
                             const prevMessage = node.previousElementSibling;
@@ -73,6 +73,6 @@
         });
 
         observer.observe(chatElement, { childList: true });
-        console.log("🌦️ Text Weather extension (v2.1.0) loaded successfully!");
+        console.log("🌦️ Text Weather extension (v3.0.0) loaded successfully!");
     }
 })();
